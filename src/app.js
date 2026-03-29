@@ -10,7 +10,7 @@ const mediaRoutes = require("./routes/mediaRoutes");
 
 const app = express();
 
-// Middlewares 
+// Middlewares
 app.use(cors()); // Activar Cross-Origin Resource Sharing para las peticiones que vienen del Frontend.
 app.use(express.json()); // Parsear archivos JSON del cuerpo de la petición
 app.use(express.urlencoded({ extended: true })); // Parsear URL-encoded del cuerpo de la petición a formato JSON.
@@ -21,6 +21,11 @@ app.use("/api/directores", directorRoutes);
 app.use("/api/productoras", productoraRoutes);
 app.use("/api/tipos", tipoRoutes);
 app.use("/api/medias", mediaRoutes);
+
+// Healthcheck para Railway/monitoreo
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", uptime: process.uptime() });
+});
 
 // Directorio raiz (Root endpoint)
 app.get("/", (req, res) => {
@@ -36,6 +41,12 @@ app.get("/", (req, res) => {
       medias: "/api/medias",
     },
   });
+});
+
+// Error handler global
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ ok: false, mensaje: "Error interno del servidor" });
 });
 
 // 404 handler
